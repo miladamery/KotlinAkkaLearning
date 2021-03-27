@@ -1,0 +1,1 @@
+https://doc.akka.io/docs/akka/current/typed/guide/tutorial_4.html#keeping-track-of-the-device-actors-in-the-group
