@@ -6,7 +6,7 @@ import akka.actor.Props
 import akka.event.Logging
 import akka.event.LoggingAdapter
 import com.typesafe.config.ConfigFactory
-
+import playground.akka.essentials.tell
 fun main() {
     /**
      *  1- inline configuration
