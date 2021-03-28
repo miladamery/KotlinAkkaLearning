@@ -1,4 +1,4 @@
-package playground.akka.essentials.par4faulttolerance
+package playground.akka.essentials.part4faulttolerance
 
 import akka.actor.*
 import akka.event.Logging
