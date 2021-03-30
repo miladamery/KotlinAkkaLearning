@@ -24,6 +24,8 @@ hs_err_pid*
 
 .idea/
 target/
-mainModule.iml
+*.iml
 New Text Document.txt
 
+/target/
+/.idea/
