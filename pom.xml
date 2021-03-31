@@ -133,6 +133,19 @@
             <version>4.13</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Akka persistence dependencies-->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-persistence_2.13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-persistence-testkit_2.13</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Akka persistence dependencies-->
+
     </dependencies>
 
 </project>
