@@ -12,13 +12,11 @@ import akkadocumentation.iotexample.Device.TemperatureRecorded
 import akkadocumentation.iotexample.Device.RecordTemperature
 
 
-
-
 class Device private constructor(
     actorContext: ActorContext<Device.Command>,
     private val groupId: String,
     private val deviceId: String
-): AbstractBehavior<Device.Command>(actorContext) {
+) : AbstractBehavior<Device.Command>(actorContext) {
 
     private var lastTemperatureReading: Double? = null
 
@@ -38,14 +36,20 @@ class Device private constructor(
 
     data class RespondTemperature(var requestId: Long, val value: Double?)
 
-    data class RecordTemperature(val requestId: Long, val value: Double?, val replyTo: ActorRef<TemperatureRecorded>): Command
+    data class RecordTemperature(val requestId: Long, val value: Double?, val replyTo: ActorRef<TemperatureRecorded>) :
+        Command
 
     data class TemperatureRecorded(val requestId: Long)
+
+    enum class Passivate : Command {
+        INSTANCE
+    }
 
     override fun createReceive(): Receive<Command> {
         return newReceiveBuilder()
             .onMessage(ReadTemperature::class.java) { msg -> onReadTemperature(msg) }
-            .onMessage(RecordTemperature::class.java) {msg -> onRecordTemperature(msg)}
+            .onMessage(RecordTemperature::class.java) { msg -> onRecordTemperature(msg) }
+            .onMessage(Passivate::class.java) { Behaviors.stopped() }
             .onSignal(PostStop::class.java) { onPostStop() }
             .build()
     }

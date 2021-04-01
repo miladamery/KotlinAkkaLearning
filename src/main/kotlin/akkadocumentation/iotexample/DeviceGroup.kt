@@ -35,6 +35,8 @@ class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Com
     override fun createReceive(): Receive<Command> {
         return newReceiveBuilder()
             .onMessage(DeviceManager.RequestTrackDevice::class.java) { msg -> onTrackDevice(msg) }
+            .onMessage(RequestDeviceList::class.java) { msg -> onDeviceList(msg) }
+            .onMessage(DeviceTerminated::class.java) { msg -> onTerminated(msg) }
             .onSignal(PostStop::class.java) { onPostStop() }
             .build()
     }
@@ -50,6 +52,7 @@ class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Com
                 context.log.info("Creating device actor for {}", trackMsg.deviceId)
                 var deviceActor =
                     context.spawn(Device.create(trackMsg.groupId, trackMsg.deviceId), "device-" + trackMsg.deviceId)
+                context.watchWith(deviceActor, DeviceTerminated(deviceActor, groupId, trackMsg.deviceId))
                 trackMsg.replyTo.tell(DeviceManager.DeviceRegistered(deviceActor))
                 deviceActor
             }
@@ -60,6 +63,17 @@ class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Com
                 this.groupId
             )
         }
+        return this
+    }
+
+    private fun onDeviceList(request: RequestDeviceList): DeviceGroup {
+        request.replyTo.tell(ReplyDeviceList(request.requestId, deviceIdToActor.keys))
+        return this
+    }
+
+    private fun onTerminated(deviceTerminated: DeviceTerminated): DeviceGroup {
+        context.log.info("Device actor for {} has been terminated", deviceTerminated.deviceId)
+        deviceIdToActor.remove(deviceTerminated.deviceId)
         return this
     }
 }

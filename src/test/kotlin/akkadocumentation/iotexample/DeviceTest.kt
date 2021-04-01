@@ -77,4 +77,54 @@ class DeviceTest {
         groupActor.tell(DeviceManager.RequestTrackDevice("wrongGroup", "device1", deviceRegisteredProbe.ref))
         deviceRegisteredProbe.expectNoMessage()
     }
+
+    @Test
+    fun testListActiveDevices() {
+        val registeredProbe = testKit.createTestProbe(DeviceManager.DeviceRegistered::class.java)
+        val deviceGroupActor = testKit.spawn(DeviceGroup.create("group"))
+
+        deviceGroupActor.tell(DeviceManager.RequestTrackDevice("group", "device1", registeredProbe.ref))
+        registeredProbe.receiveMessage()
+
+        deviceGroupActor.tell(DeviceManager.RequestTrackDevice("group", "device2", registeredProbe.ref))
+        registeredProbe.receiveMessage()
+
+        val deviceListProbe = testKit.createTestProbe(ReplyDeviceList::class.java)
+        deviceGroupActor.tell(RequestDeviceList(0L, "group", deviceListProbe.ref))
+        val reply = deviceListProbe.receiveMessage()
+
+        assertEquals(0L, reply.requestId)
+        assertEquals(setOf("device1", "device2"), reply.ids)
+    }
+
+    @Test
+    fun testListActiveDevicesAfterOneShutDown() {
+        val registeredProbe = testKit.createTestProbe(DeviceManager.DeviceRegistered::class.java)
+        val deviceGroupActor = testKit.spawn(DeviceGroup.create("group"))
+
+        deviceGroupActor.tell(DeviceManager.RequestTrackDevice("group", "device1", registeredProbe.ref))
+        val registered1 = registeredProbe.receiveMessage()
+
+        deviceGroupActor.tell(DeviceManager.RequestTrackDevice("group", "device2", registeredProbe.ref))
+        val registered2 = registeredProbe.receiveMessage()
+
+        val toShutDown = registered1.device
+
+        val deviceListProbe = testKit.createTestProbe(ReplyDeviceList::class.java)
+        deviceGroupActor.tell(RequestDeviceList(0L, "group", deviceListProbe.ref))
+        val reply = deviceListProbe.receiveMessage()
+
+        assertEquals(0L, reply.requestId)
+        assertEquals(setOf("device1", "device2"), reply.ids)
+
+        toShutDown.tell(Device.Passivate.INSTANCE)
+        registeredProbe.expectTerminated(toShutDown, registeredProbe.remainingOrDefault)
+
+        registeredProbe.awaitAssert {
+            deviceGroupActor.tell(RequestDeviceList(1L, "group", deviceListProbe.ref))
+            val replyDeviceList = deviceListProbe.receiveMessage()
+            assertEquals(1L, replyDeviceList.requestId)
+            assertEquals(setOf("device2"), replyDeviceList.ids)
+        }
+    }
 }
