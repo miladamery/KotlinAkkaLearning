@@ -34,7 +34,7 @@ class Device private constructor(
 
     data class ReadTemperature(val requestId: Long, val replyTo: ActorRef<RespondTemperature>) : Command
 
-    data class RespondTemperature(var requestId: Long, val value: Double?)
+    data class RespondTemperature(var requestId: Long,val deviceId: String, val value: Double?)
 
     data class RecordTemperature(val requestId: Long, val value: Double?, val replyTo: ActorRef<TemperatureRecorded>) :
         Command
@@ -55,7 +55,7 @@ class Device private constructor(
     }
 
     private fun onReadTemperature(r: ReadTemperature): Behavior<Command> {
-        val rrr = RespondTemperature(r.requestId, lastTemperatureReading)
+        val rrr = RespondTemperature(r.requestId, deviceId, lastTemperatureReading)
         r.replyTo.tell(rrr)
         return this
     }
