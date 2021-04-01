@@ -127,4 +127,40 @@ class DeviceTest {
             assertEquals(setOf("device2"), replyDeviceList.ids)
         }
     }
+
+    @Test
+    fun testCollectTemperaturesFromAllActiveDevices() {
+        val registeredProbe = testKit.createTestProbe(DeviceManager.DeviceRegistered::class.java)
+        val groupActor = testKit.spawn(DeviceGroup.create("group"))
+
+        groupActor.tell(DeviceManager.RequestTrackDevice("group", "device1", registeredProbe.ref))
+        val deviceActor1 = registeredProbe.receiveMessage().device
+
+        groupActor.tell(DeviceManager.RequestTrackDevice("group", "device2", registeredProbe.ref))
+        val deviceActor2 = registeredProbe.receiveMessage().device
+
+        groupActor.tell(DeviceManager.RequestTrackDevice("group", "device3", registeredProbe.ref))
+        val deviceActor3 = registeredProbe.receiveMessage().device
+
+        val recordProbe = testKit.createTestProbe(Device.TemperatureRecorded::class.java)
+        deviceActor1.tell(Device.RecordTemperature(0L, 1.0, recordProbe.ref))
+        assertEquals(0L, recordProbe.receiveMessage().requestId)
+
+        deviceActor2.tell(Device.RecordTemperature(1L, 2.0, recordProbe.ref))
+        assertEquals(1L, recordProbe.receiveMessage().requestId)
+        // No Temperature for device3
+
+        val allTempProbe = testKit.createTestProbe(RespondAllTemperatures::class.java)
+        groupActor.tell(RequestAllTemperatures(0L, "group", allTempProbe.ref))
+        val response = allTempProbe.receiveMessage()
+        assertEquals(0L, response.requestId)
+
+        val expectedTemperatures = mapOf(
+            "device1" to Temperature(1.0),
+            "device2" to Temperature(2.0),
+            "device3" to TemperatureNotAvailable.INSTANCE
+        )
+
+        assertEquals(expectedTemperatures, response.temperatures)
+    }
 }

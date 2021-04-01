@@ -7,6 +7,7 @@ import akka.actor.typed.javadsl.AbstractBehavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
 import akka.actor.typed.javadsl.Receive
+import java.time.Duration
 
 class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Command>, var groupId: String) :
     AbstractBehavior<DeviceGroup.Command>(actorContext) {
@@ -37,6 +38,7 @@ class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Com
             .onMessage(DeviceManager.RequestTrackDevice::class.java) { msg -> onTrackDevice(msg) }
             .onMessage(RequestDeviceList::class.java) { msg -> onDeviceList(msg) }
             .onMessage(DeviceTerminated::class.java) { msg -> onTerminated(msg) }
+            .onMessage(RequestAllTemperatures::class.java, { it.groupId == groupId }) { msg -> onAllTemperatures(msg) }
             .onSignal(PostStop::class.java) { onPostStop() }
             .build()
     }
@@ -76,4 +78,18 @@ class DeviceGroup private constructor(actorContext: ActorContext<DeviceGroup.Com
         deviceIdToActor.remove(deviceTerminated.deviceId)
         return this
     }
+
+    private fun onAllTemperatures(r: RequestAllTemperatures): DeviceGroup {
+        val deviceIdToActorCopy = deviceIdToActor.toMap()
+        context.spawnAnonymous(
+            DeviceGroupQuery.create(
+                deviceIdToActorCopy,
+                r.requestId,
+                r.replyTo,
+                Duration.ofSeconds(3)
+            )
+        )
+        return this
+    }
+
 }
