@@ -24,7 +24,7 @@ class MultiplePersists {
     data class TaxRecord(val taxId: String, val recordId: Int, val date: Date, val totalAmount: Int): Serializable
     data class InvoiceRecord(val invoiceRecordId: Int, val recipient: String, val date: Date, val amount: Int): Serializable
 
-    class DiligentAccountant private constructor(var taxId: String, val taxAuthority: ActorRef) :
+    class DiligentAccountant private constructor(private var taxId: String, private val taxAuthority: ActorRef) :
         AbstractPersistentActor() {
         private val log = Logging.getLogger(this)
         private var latestTaxRecordId = 0
