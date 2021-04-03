@@ -21,7 +21,7 @@ class Snapshots {
     data class ReceivedMessageRecord(val id: Int, val contents: String): Serializable
     data class SentMessageRecord(val id: Int, val contents: String): Serializable
 
-    class Chat(val owner: String, val contact: String) : AbstractPersistentActor() {
+    class Chat(private val owner: String, val contact: String) : AbstractPersistentActor() {
         private val log = Logging.getLogger(this)
         private var currentMessageId = 0
         private val MAX_MESSAGES = 10
