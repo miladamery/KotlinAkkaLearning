@@ -1,5 +1,6 @@
 package playground.akka.persistence.part2_event_sourcing.typed
 
+import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import akka.actor.typed.javadsl.ActorContext
 import akka.actor.typed.javadsl.Behaviors
@@ -16,6 +17,7 @@ class TypedSnapshots {
     sealed class Command {
         data class ReceivedMessage(val contents: String): Command() // message From your contact
         data class SentMessage(val contents: String): Command() // message TO your contact
+        object Print: Command()
     }
 
     sealed class Event {
@@ -23,7 +25,7 @@ class TypedSnapshots {
         data class SentMessageRecord(val id: Int, val contents: String) : Event(), Serializable
     }
 
-    data class ChatSate(val currentMessageId: Int, val lastMessages: Queue<Pair<String, String>>)
+    data class ChatSate(val currentMessageId: Int, val lastMessages: Queue<Pair<String, String>>): Serializable
 
     class Chat private constructor(
         private val owner: String,
@@ -53,6 +55,10 @@ class TypedSnapshots {
                 .onCommand(Command.SentMessage::class.java){ state, command ->
                     Effect().persist(Event.SentMessageRecord(state.currentMessageId, command.contents))
                 }
+                .onCommand(Command.Print::class.java) { state, command ->
+                    context.log.info("Most recent messages: ${state.lastMessages}")
+                    Effect().none()
+                }
                 .build()
         }
 
@@ -77,7 +83,19 @@ class TypedSnapshots {
         }
 
         override fun shouldSnapshot(state: ChatSate, event: Event?, sequenceNr: Long): Boolean {
+            context.log.info("Saving checkpoint....")
             return state.lastMessages.size >= MAX_MESSAGES
         }
     }
+}
+
+fun main() {
+    val system = ActorSystem.create(TypedSnapshots.Chat.create("Daniel", "Martin"), "TypedSnapshots")
+
+    /*(1..100000).forEach {
+        system.tell(TypedSnapshots.Command.ReceivedMessage("Akka Rocks $it"))
+        system.tell(TypedSnapshots.Command.SentMessage("Akka Rules $it"))
+        Thread.sleep(2)
+    }*/
+    system.tell(TypedSnapshots.Command.Print)
 }
