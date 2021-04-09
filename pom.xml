@@ -185,10 +185,16 @@
             <artifactId>slick_2.13</artifactId>
             <version>3.3.3</version>
         </dependency>
+
         <dependency>
-            <groupId>com.typesafe.slick</groupId>
-            <artifactId>slick-hikaricp_2.13</artifactId>
-            <version>3.3.3</version>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-persistence-cassandra_2.13</artifactId>
+            <version>1.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-tools_2.13</artifactId>
+            <version>${akka.version}</version>
         </dependency>
         <!-- Akka persistence dependencies-->
 
