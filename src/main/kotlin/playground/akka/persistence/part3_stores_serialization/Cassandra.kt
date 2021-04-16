@@ -12,7 +12,7 @@ fun main() {
     val system = ActorSystem.create("cassandraStoresSystem", ConfigFactory.load().getConfig("cassandraDemo"))
     val persistentActor = system.actorOf(Props.create(SimplePersistentActor::class.java), "simpleCassandraPersistentActor")
 
-    /*(1..10).forEach {
+    (1..10).forEach {
         persistentActor.tell("I Love Akka [$it]", ActorRef.noSender())
     }
     persistentActor.tell("print", ActorRef.noSender())
@@ -20,7 +20,7 @@ fun main() {
 
     (11..20).forEach {
         persistentActor.tell("I Love Akka [$it]", ActorRef.noSender())
-    }*/
+    }
 
     persistentActor.tell("print", ActorRef.noSender())
 }
