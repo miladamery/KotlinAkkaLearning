@@ -221,6 +221,20 @@
             <artifactId>akka-http_2.13</artifactId>
         </dependency>
         <!-- Akka HTTP-->
+        <!-- Akka clustering -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster_2.13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-tools_2.13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-sharding_2.13</artifactId>
+        </dependency>
+        <!-- Akka clustering -->
     </dependencies>
 
 </project>
