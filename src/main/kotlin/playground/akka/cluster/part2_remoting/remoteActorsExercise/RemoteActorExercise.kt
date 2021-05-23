@@ -100,7 +100,7 @@ fun main() {
     Thread.sleep(1000)
 
     var i = 0
-    Files.lines(Paths.get("C:\\Projects\\KotlinAkkaLearning\\src\\main\\resources\\txt\\lipsum.txt")).forEach { line ->
+    Files.lines(Paths.get("E:\\training\\KotlinAkkaLearning\\src\\main\\resources\\txt\\lipsum.txt")).forEach { line ->
         master.tell(line, ActorRef.noSender())
     }
 
