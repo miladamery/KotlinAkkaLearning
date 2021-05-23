@@ -224,6 +224,10 @@
         <!-- Akka clustering -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-typed_2.13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-remote_2.13</artifactId>
         </dependency>
         <dependency>
